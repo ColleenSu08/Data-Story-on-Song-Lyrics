@@ -36,7 +36,7 @@ library(DT)
 
 ```{r}
 # load lyrics data
-load('../data/lyrics.RData') 
+load('/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/data/lyrics.RData') 
 ```
 
 

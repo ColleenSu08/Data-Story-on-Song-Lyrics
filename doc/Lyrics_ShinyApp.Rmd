@@ -202,8 +202,3 @@ server <- function(input, output) {
 ```{r shiny app, warning=FALSE, message=FALSE}
 shinyApp(ui, server)
 ```
-
-
-
-
-
