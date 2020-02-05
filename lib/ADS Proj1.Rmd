@@ -122,14 +122,14 @@ For metal music, it is clear that the two leading emotions are "fear" and "sadne
 
 #### Rock
 ```{r echo=FALSE}
-emo <- emotion(split_metal)
-plot(emo,facet = 'negated')
+emo_rock <- emotion(split_rock)
+plot(emo_rock, facet = 'negated')
 ```
 
 #### Metal
 ```{r echo=FALSE}
-emo_rock <- emotion(split_rock)
-plot(emo_rock, facet = 'negated')
+emo <- emotion(split_metal)
+plot(emo,facet = 'negated')
 ```
 
 ## Summary
