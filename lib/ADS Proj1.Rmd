@@ -1,0 +1,147 @@
+---
+title: "Heavy Metal: the Rebel Child of Rock"
+author: "Colleen (Kexin) Su"
+output: html_document
+---
+```{r echo=FALSE}
+knitr::include_graphics("/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/figs/1-heavymetalsb.jpg")
+```
+
+In the 1960s, rock music was one of the most prevalent and significant music genre in the US, from which many subgenre emerge. Metal was one of them. Different from rock music which encompass a wide range of themes and styles, metal music was known for its dark and rebellious style. In this project, We are going to examine the lyrics from rock and metal music, and find out, despite stereotype, how different is the theme between the two genres.
+
+```{r include=FALSE}
+load("/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/output/processed_lyrics.RData")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library("sentimentr")
+
+metal <- dt_lyrics%>%filter(genre=='Metal')
+rock <- dt_lyrics%>%filter(genre=='Rock')
+
+split_metal <- get_sentences(metal$stemmedwords)
+split_rock <- get_sentences(rock$stemmedwords)
+```
+
+### What are the words that are most frequently used by the two genres?
+
+Using the ShinyApp provided, we are able to see the 50 most frequently used words in the lyrics of these two genres. By comparing these two word clouds, we can see that "time" is an important word for both genres, but except this similarity, there are also some interesting differences. By examining the word cloud of rock music, we can tell that the theme of rock is very diverse. "Love" is the dominant theme and the lyrics has many warm-hearted words like "home","friend","light". However, just like where there is light there is shadow, the lyrics of rock music also has some dark themes such as "ill", "lie", "cry" etc. 
+
+Compared to rock's, the theme of metal music's lyrics is not dominated by a specific word, but rather evenly distributed among a number of different words including "time", "life", "world". Also, we see more negative and occult words such as "die", "blood", "pain", "soul", "hell" etc. 
+
+#### Rock
+```{r echo=FALSE}
+knitr::include_graphics("/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/figs/Rock_wc.png")
+```
+
+#### Metal
+```{r pressure, echo=FALSE}
+knitr::include_graphics("/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/figs/Metal_wc.png")
+```
+
+## Comparing the sentiment (polarity) of rock and metal music
+
+For acquiring the sentiment scores, I used the sentimentr package which returns a sentiment score for each lyric. The sign of the score indicates the polarity of the sentence, and the magnitude represents how positive/negative the sentense is. 
+
+From the summarizing statistics, we can see that the average sentiment score for rock music is relatively close to zero, which indicates that the overall tone of the lyrics is quite neutral. This is coherent to what we see in the word cloud, where the number of positive and negative themes are about the same, which balances out the sentiment score. 
+
+Compared to rock, the average sentiment score for metal is significantly more negative, almost close to -1. This also echos what we saw in the word cloud, where dark and rebellious words are more pften used. 
+
+```{r include=FALSE}
+sent_rock <- sentiment_by(rock$stemmedwords)
+sent_metal <- sentiment_by(metal$stemmedwords)
+```
+
+#### Rock
+```{r echo=FALSE}
+summary(sent_rock$ave_sentiment)
+```
+
+#### Metal
+```{r echo=FALSE}
+summary(sent_metal$ave_sentiment)
+```
+
+
+Similar to what we found above, the histograms show that the distribution of sentiment score for rock music is centered around 0, while the distribution for metal is centered around -0.7. Also, we can see that the sentiment score for metal has a higher variance than that of rock music, which means that unlike rock music that are mostly neutral-toned, metal music tend to have a wider range of polarity and more variety in the degree of its emotion. Another things that we can see from the histogram is that rock music has a lot more songs than metal, which is not suprising since metal is a subgenre of rock.
+
+```{r echo=FALSE}
+ggplot(sent_rock,aes(ave_sentiment))+
+  geom_histogram(color="#CC79A7", fill="lightpink",binwidth=0.25)+
+  labs(title='Sentiment Score for Rock',x = 'Sentiment Score', y = 'Frequency')+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(sent_metal,aes(ave_sentiment))+
+  geom_histogram(color="darkblue", fill="lightblue",binwidth=0.25)+
+  labs(title='Sentiment Score for Metal',x = 'Sentiment Score', y = 'Frequency')+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+## How does the sentiment score changes over time?
+
+To take a closer look at the sentiment score, I ploted boxplots of each genre according to year. From the two graph we can see that the sentiment score for rock is pretty stable overtime without much change. On the other hand, metal music experienced an unstable period for the sentiment in their song before 2004, then reached a balance point afterwards.
+
+#### Rock
+```{r echo=FALSE}
+rock <- rock%>%mutate(element_id = row_number())%>%
+  inner_join(sentiment(split_rock))%>%
+  select(c(element_id,year,stemmedwords,word_count,sentiment))%>%
+  mutate(sentiment=as.numeric(format(round(sentiment,3),scientific=F)))
+
+ggplot(rock,aes(x=year,y=sentiment,group=year))+
+  geom_boxplot()+
+  ggtitle("Sentiment Score by Year")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+#### Metal
+```{r echo=FALSE}
+metal <- metal%>%mutate(element_id = row_number())%>%
+  inner_join(sentiment(split_metal))%>%
+  select(c(element_id,year,stemmedwords,word_count,sentiment))%>%
+  mutate(sentiment=as.numeric(format(round(sentiment,3),scientific=F)))
+
+ggplot(metal,aes(x=year,y=sentiment,group=year))+
+  geom_boxplot()+
+  ggtitle("Sentiment Score by Year")+
+  theme_light()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+## What are the prevailing emotions?
+
+To create the emotion graph, I used the emotion function from sentimentr package. These graphs show the propensity of eight categories of emotions and are faceted by if the emotion is 'negated'. For the data I use, there will not be any negated emotions since the word "not" was removed as a stopword during data cleaning. 
+
+From the graphs, we can see that the prevaling emotions are "joy" and "sadness", with second-tier emotions such as "fear", "anticipation" and "trust" clustering together. This is shows that rock songs include a variety of both positive and negative emotions.
+
+For metal music, it is clear that the two leading emotions are "fear" and "sadness", and the next prevailing emotion is anger. The propensity of these three emotions are significantly higher than others, and thus agreeing to its reputation that the emotion of metal music tend to be negatively oriented.
+
+#### Rock
+```{r echo=FALSE}
+emo <- emotion(split_metal)
+plot(emo,facet = 'negated')
+```
+
+#### Metal
+```{r echo=FALSE}
+emo_rock <- emotion(split_rock)
+plot(emo_rock, facet = 'negated')
+```
+
+## Summary
+
+By analyzing and comparing the lyrics of rock and metal music, we found that:
+* Rock music encompass a wide range of themes, including both positive and negative. The sentiment of its lyrics are relatively neutral and stable over the years. The emotions that the songs carry are mixed, with "joy" and "sadness" being the prevailing emotion.
+* Metal music's theme are more dark and occult than rock music, with significantly more negative word choice. The lyrics carry negative sentiments and are unstable until around 2004. The emotions of the songs are mostly pessimistic, with "fear" and "sadness" being the leading emotion.
+
+```{r echo=FALSE}
+knitr::include_graphics("/Users/kexinsu/Documents/GitHub/Spring2020-Project1-ColleenSu08/figs/metal_and_rock.jpg")
+```
+
+## Reference
+
+“Heavy Metal 101 @ MIT.” A Brief History of Metal | Heavy Metal 101 @ MIT, metal.mit.edu/brief-history-metal.
