@@ -18,11 +18,11 @@ Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by
 
 ```
 proj/
-├── lib/
-├── data/
-├── doc/
+├── lib/ contains the code for data preparation and processing, and the final html report of this project
+├── data/ contains the raw data
+├── doc/ contains the code for data analysis and visualization for this project
 ├── figs/
-└── output/
+└── output/ contains the processed data
 ```
 
 Please see each subfolder for a README file.
